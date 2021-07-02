@@ -34,8 +34,43 @@ class LoginForm:
         self.btn_register.place(x=105, y=225)
 
     def login(self):
-        root.withdraw()
-        self.menu_window()
+        # If paswword is enetered by the
+        # user
+        if self.ent_passwd.get():
+            db = mysql.connect(host="localhost",
+                               user="lifechoices",
+                               password="@Lifechoices1234",
+                               db="Hospital")
+            cursor = db.cursor()
+
+        # If no password is enetered by the
+        # user
+        else:
+            db = mysql.connect(host="localhost",
+                               user="lifechoices",
+                               db="Hospital")
+            cursor = db.cursor()
+
+        # A Table in the database
+        savequery = "select * from Login"
+
+        try:
+            cursor.execute(savequery)
+            myresult = cursor.fetchall()
+
+            # Printing the result of the
+            # query
+            for x in myresult:
+                if x[1] == str(self.ent_passwd.get()) and x[0] == str(self.ent_user.get()):
+                    messagebox.showinfo("Success", "You Have Logged In Successfully")
+                    root.withdraw()
+                    self.menu_window()
+                else:
+                    db.rollback()
+                    messagebox.showerror("Error", "Incorrect Password or Username")
+
+        except ValueError:
+            pass
 
     def clear_input(self):
         self.ent_user.delete(0, END)
@@ -61,12 +96,14 @@ class LoginForm:
 
         db.commit()
 
-        if self.ent_passwd.get() == str(self.ent_passwd.get()):
-            messagebox.showerror("Error", "Please Enter A Number Password")
-        else:
-            messagebox.showinfo("Success", "You Have Successfully Registered Your Username and Password")
-            root.withdraw()
-            self.menu_window()
+        try:
+            entry = int(self.ent_passwd.get())
+            if entry != str(self.ent_passwd.get()):
+                messagebox.showinfo("Success", "You Have Successfully Registered Your Username and Password")
+                root.withdraw()
+                self.menu_window()
+        except ValueError:
+            messagebox.showerror("Error", "Please Enter A Numeric Password")
 
     def menu_window(self):
         menu = Toplevel()
